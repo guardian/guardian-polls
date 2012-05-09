@@ -1,0 +1,16 @@
+@(q:com.gu.polls.model.Question, answers:Iterable[com.gu.polls.model.Answer])
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Welcome</title>
+	</head>
+	<body>
+		<h1>Welcome @q.id</h1>
+        <p>Total answers = @q.count</p>
+    <ol>
+        @answers.map { answer =>
+        <li>@answer.id = @answer.count</li>
+        }
+    </ol>
+	</body>
+</html>
