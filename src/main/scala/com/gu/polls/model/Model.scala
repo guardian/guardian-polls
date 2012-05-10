@@ -36,12 +36,12 @@ case class Answer(
 
 object Answer {
   def create(answerId: Long, QuestionId: Long, count: Long) {
-    Ofy.save.entity(Answer(answerId,QuestionId,count))
+    Ofy.save.entity(Answer(answerId,QuestionId,count)).now
   }
 
   def get(id: Long) = Option(Ofy.load.kind(classOf[Answer]).id(id).get)
   def getOrCreate(id: Long, questionId: Long) = get(id) match {
-    case Some(q) => q
+    case Some(a) => a
     case None => Answer(id, questionId, 0)
   }
 
