@@ -24,4 +24,6 @@ seq(appengineSettings: _*)
 
 seq(Twirl.settings: _*)
 
+scalariformSettings
+
 Twirl.twirlImports := Seq("com.gu.polls.model._")

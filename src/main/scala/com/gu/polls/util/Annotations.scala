@@ -4,7 +4,7 @@ import com.googlecode.objectify.annotation
 import scala.annotation.target.field
 
 object Annotations {
-  
+
   type AlsoLoad = annotation.AlsoLoad @field
   type Embed = annotation.Embed @field
   type Id = annotation.Id @field
@@ -18,5 +18,5 @@ object Annotations {
   type Serialize = annotation.Serialize @field
   type Translate = annotation.Translate @field
   type Unindex = annotation.Unindex @field
-  
+
 }
