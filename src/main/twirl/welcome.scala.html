@@ -1,4 +1,4 @@
-@(q:Question, answers:Iterable[Answer])
+@(questions:Iterable[Question])
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 	<head>
@@ -22,15 +22,25 @@
                 <li class="question-container">
                     <ol>
                         <li>
-                            <input type="radio" name="q-6998" id="a-12616" value="a-12616"> <label for="a-12616">Yes</label>
+                            <input type="checkbox" name="q-6998" id="a-12616" value="a-12616"> <label for="a-12616">1</label>
                         </li>
                         <li>
-                            <input type="radio" name="q-6998" id="a-12617" value="a-12617"> <label for="a-12617">No</label>
+                            <input type="checkbox" name="q-6998" id="a-12617" value="a-12617"> <label for="a-12617">2</label>
                         </li>
                     </ol>
                 </li>
             </ol>
             <p class="vote"><input type="submit" value="Vote" id="submit"></p>
         </form>
+    <h2>Results</h2>
+    @questions.map { q =>
+        <h3>@q.id</h3>
+        <p>Total votes: @q.count</p>
+        <ul>
+            @Answer.forQuestion(q.id).map { a =>
+            <li>@a.id = @a.count</li>
+            }
+        </ul>
+    }
 	</body>
 </html>
