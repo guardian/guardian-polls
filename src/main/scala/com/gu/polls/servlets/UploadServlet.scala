@@ -9,6 +9,7 @@ import com.gu.polls.util.Ofy
 import com.google.appengine.api.taskqueue.QueueFactory
 import com.google.appengine.api.taskqueue.TaskOptions.Builder._
 import cc.spray.json._
+import org.apache.commons.fileupload.FileItemFactory
 
 case class PollLine(pollId: Long, questionId: Long, questionTotal: Long, answerId: Long, answerTotal: Long)
 
@@ -41,8 +42,8 @@ class UploadServlet extends ScalatraServlet with FileUploadSupport {
   post("/queue") {
     val polls: List[PollLine] = params("polls").asJson.convertTo[List[PollLine]]
     val pollObjs = polls.flatMap { poll =>
-      Answer.getOrCreate(poll.answerId, poll.questionId, poll.answerTotal) ::
-        Question.getOrCreate(poll.questionId, poll.pollId, poll.questionTotal) ::
+      Answer.getOrCreate(poll.questionId, poll.answerId, poll.answerTotal) ::
+        Question.getOrCreate(poll.pollId, poll.questionId, poll.questionTotal) ::
         Nil
     }
     pollObjs.foreach { p => log.info(p.toString) }

@@ -37,7 +37,7 @@
         <h3>@q.id</h3>
         <p>Total votes: @q.count</p>
         <ul>
-            @Answer.forQuestion(q.id).map { a =>
+            @Answer.getByQuestionId(q.id).map { a =>
             <li>@a.id = @a.count</li>
             }
         </ul>

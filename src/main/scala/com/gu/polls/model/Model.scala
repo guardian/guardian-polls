@@ -16,7 +16,7 @@ case class Question(
 object Question {
   def getByPollId(pollId: Long) = Ofy.load.kind(classOf[Question]).filter("pollId", pollId).iterable.asScala
   def get(id: Long) = Option(Ofy.load.kind(classOf[Question]).id(id).get)
-  def getOrCreate(id: Long, pollId: Long, count: Long = 0) = get(id) match {
+  def getOrCreate(pollId: Long, id: Long, count: Long = 0) = get(id) match {
     case Some(q) => q
     case None => Question(pollId, id, count)
   }
@@ -24,24 +24,20 @@ object Question {
 
 @Entity
 case class Answer(
-    @Id var id: Long,
     @Index var question: Long,
+    @Id var id: Long,
     var count: Long) {
   private def this() { this(0, 0, 0) }
 }
 
 object Answer {
-  def create(answerId: Long, QuestionId: Long, count: Long) {
-    Ofy.save.entity(Answer(answerId, QuestionId, count)).now
-  }
-
+  def getByQuestionId(question: Long) = Ofy.load.kind(classOf[Answer]).filter("question", question).iterable.asScala
   def get(id: Long) = Option(Ofy.load.kind(classOf[Answer]).id(id).get)
-  def getOrCreate(id: Long, questionId: Long, count: Long = 0) = get(id) match {
+  def getOrCreate(questionId: Long, id: Long, count: Long = 0) = get(id) match {
     case Some(a) => a
-    case None => Answer(id, questionId, count)
+    case None => Answer(questionId, id, count)
   }
 
-  def forQuestion(question: Long) = Ofy.load.kind(classOf[Answer]).filter("question", question).iterable.asScala
 }
 
 import cc.spray.json._
@@ -52,7 +48,7 @@ object PollJsonProtocols extends DefaultJsonProtocol {
     def write(q: Question) = JsObject(
       "id" -> JsNumber(q.id),
       "count" -> JsNumber(q.count),
-      "answers" -> JsArray(Answer.forQuestion(q.id) map { _.toJson } toList)
+      "answers" -> JsArray(Answer.getByQuestionId(q.id) map { _.toJson } toList)
     )
     def read(value: JsValue) = throw new DeserializationException("Can't deserialise Questions")
   }
