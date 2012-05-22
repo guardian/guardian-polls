@@ -11,6 +11,7 @@ resolvers += "Objectify Repo" at "http://objectify-appengine.googlecode.com/svn/
 libraryDependencies ++= Seq(
   "com.googlecode.objectify" % "objectify" % "4.0a3",
   "org.scalatra" %% "scalatra" % "2.0.4",
+  "org.scalatra" %% "scalatra-fileupload" % "2.0.4",
   "javax.persistence" % "persistence-api" % "1.0",
   "com.google.appengine" % "appengine-api-1.0-sdk" % "1.6.5",
   "ch.qos.logback" % "logback-classic" % "0.9.26",

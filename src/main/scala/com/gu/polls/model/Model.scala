@@ -16,9 +16,9 @@ case class Question(
 object Question {
   def getByPollId(pollId: Long) = Ofy.load.kind(classOf[Question]).filter("pollId", pollId).iterable.asScala
   def get(id: Long) = Option(Ofy.load.kind(classOf[Question]).id(id).get)
-  def getOrCreate(id: Long, pollId: Long) = get(id) match {
+  def getOrCreate(id: Long, pollId: Long, count: Long = 0) = get(id) match {
     case Some(q) => q
-    case None => Question(pollId, id, 0)
+    case None => Question(pollId, id, count)
   }
 }
 
@@ -36,9 +36,9 @@ object Answer {
   }
 
   def get(id: Long) = Option(Ofy.load.kind(classOf[Answer]).id(id).get)
-  def getOrCreate(id: Long, questionId: Long) = get(id) match {
+  def getOrCreate(id: Long, questionId: Long, count: Long = 0) = get(id) match {
     case Some(a) => a
-    case None => Answer(id, questionId, 0)
+    case None => Answer(id, questionId, count)
   }
 
   def forQuestion(question: Long) = Ofy.load.kind(classOf[Answer]).filter("question", question).iterable.asScala
