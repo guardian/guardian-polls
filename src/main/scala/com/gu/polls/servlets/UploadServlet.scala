@@ -10,10 +10,15 @@ import com.google.appengine.api.taskqueue.QueueFactory
 import com.google.appengine.api.taskqueue.TaskOptions.Builder._
 import cc.spray.json._
 import org.apache.commons.fileupload.FileItemFactory
+import org.apache.commons.fileupload.disk.DiskFileItemFactory
 
 case class PollLine(pollId: Long, questionId: Long, questionTotal: Long, answerId: Long, answerTotal: Long)
 
 class UploadServlet extends ScalatraServlet with FileUploadSupport {
+  // Our import is a couple of hundred k, support large in-memory files
+  // We know that this import is done rarely, so this should be fine.
+  override lazy val fileItemFactory = new DiskFileItemFactory(512 * 1024, null)
+
   import DefaultJsonProtocol._
   implicit val pollLineFormat = jsonFormat5(PollLine.apply)
 
@@ -23,8 +28,8 @@ class UploadServlet extends ScalatraServlet with FileUploadSupport {
     val polls = Source.fromInputStream(fileParams("thefile").getInputStream)
       .getLines()
       .map { _.split(",") }
-      .map { line => PollLine(line(0).toLong, line(1).toLong, line(2).toLong, line(3).toLong, line(4).toLong).toJson }.toList
-    polls.grouped(10).foreach { pollList =>
+      .map { line => PollLine(line(0).toLong, line(1).toLong, line(2).toLong, line(3).toLong, line(4).toLong).toJson }
+    polls.grouped(50).foreach { pollList =>
       QueueFactory.getDefaultQueue.add(
         withUrl("/data/queue")
           .param("polls", pollList.toJson.compactPrint)
