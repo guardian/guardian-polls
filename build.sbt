@@ -1,6 +1,6 @@
 name := "Guardian Polls"
 
-version := ""
+version := "1.0"
 
 organization := "com.example"
 
