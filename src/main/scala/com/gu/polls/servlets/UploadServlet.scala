@@ -1,7 +1,6 @@
 package com.gu.polls.servlets
 
 import org.scalatra.ScalatraServlet
-import org.scalatra.fileupload.FileUploadSupport
 import com.weiglewilczek.slf4s.Logger
 import scala.io.Source
 import com.gu.polls.model.{ Answer, Question }
@@ -9,15 +8,12 @@ import com.gu.polls.util.Ofy
 import com.google.appengine.api.taskqueue.QueueFactory
 import com.google.appengine.api.taskqueue.TaskOptions.Builder._
 import cc.spray.json._
-import org.apache.commons.fileupload.FileItemFactory
-import org.apache.commons.fileupload.disk.DiskFileItemFactory
+import com.google.appengine.api.blobstore.{ BlobstoreInputStream, BlobstoreServiceFactory, BlobstoreService }
+import scala.collection.JavaConverters._
 
 case class PollLine(pollId: Long, questionId: Long, questionTotal: Long, answerId: Long, answerTotal: Long)
 
-class UploadServlet extends ScalatraServlet with FileUploadSupport {
-  // Our import is a couple of hundred k, support large in-memory files
-  // We know that this import is done rarely, so this should be fine.
-  override lazy val fileItemFactory = new DiskFileItemFactory(512 * 1024, null)
+class UploadServlet extends ScalatraServlet {
 
   import DefaultJsonProtocol._
   implicit val pollLineFormat = jsonFormat5(PollLine.apply)
@@ -25,20 +21,26 @@ class UploadServlet extends ScalatraServlet with FileUploadSupport {
   val log = Logger(classOf[UploadServlet])
 
   post("/import") {
-    val polls = Source.fromInputStream(fileParams("thefile").getInputStream)
+    val blob = BlobstoreServiceFactory.getBlobstoreService.getUploads(request).get("thefile").get(0)
+    Source.fromInputStream(new BlobstoreInputStream(blob))
       .getLines()
       .map { _.split(",") }
       .map { line => PollLine(line(0).toLong, line(1).toLong, line(2).toLong, line(3).toLong, line(4).toLong).toJson }
-    polls.grouped(50).foreach { pollList =>
-      QueueFactory.getDefaultQueue.add(
-        withUrl("/data/queue")
-          .param("polls", pollList.toJson.compactPrint)
-      )
-    }
+      .grouped(25)
+      .grouped(5)
+      .foreach { groups =>
+        QueueFactory.getDefaultQueue.add(
+          groups.map { pollList =>
+            withUrl("/data/queue")
+              .param("polls", pollList.toJson.compactPrint)
+          }.toIterable.asJava)
+      }
+    BlobstoreServiceFactory.getBlobstoreService.delete(blob)
   }
 
   get("/import") {
-    <form method="post" enctype="multipart/form-data">
+    val uploadUrl = BlobstoreServiceFactory.getBlobstoreService.createUploadUrl("/data/import")
+    <form method="post" enctype="multipart/form-data" action={ uploadUrl }>
       <input type="file" name="thefile"/>
       <input type="submit"/>
     </form>
@@ -46,13 +48,11 @@ class UploadServlet extends ScalatraServlet with FileUploadSupport {
 
   post("/queue") {
     val polls: List[PollLine] = params("polls").asJson.convertTo[List[PollLine]]
-    val pollObjs = polls.flatMap { poll =>
+    polls.flatMap { poll =>
       Answer.getOrCreate(poll.questionId, poll.answerId, poll.answerTotal) ::
         Question.getOrCreate(poll.pollId, poll.questionId, poll.questionTotal) ::
         Nil
     }
-    pollObjs.foreach { p => log.info(p.toString) }
-    pollObjs
       .map { Ofy.save.entity(_) }
       .map(_.now)
 
