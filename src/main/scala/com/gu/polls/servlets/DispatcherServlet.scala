@@ -4,6 +4,7 @@ import org.scalatra.ScalatraServlet
 import com.gu.polls.util.Ofy
 import com.gu.polls.model._
 import cc.spray.json._
+import com.gu.polls.util.SignatureChecker
 
 import PollJsonProtocols._
 import com.weiglewilczek.slf4s.Logger
@@ -54,12 +55,20 @@ class DispatcherServlet extends ScalatraServlet with TwirlSupport with JsonSuppo
   }
   post("/") {
     log.info("Submitted params: " + multiParams)
-    multiParams filterKeys { s => s.startsWith("q-") } foreach {
-      case (qid, ansids) =>
-        val pollId = params("pollId").toLong
-        val questionId = qid.drop(2).toLong
-        val answerIds = ansids.map { _.drop(2).toLong }
-        Ofy.transact(new PollIncrementer(pollId, questionId, answerIds))
+    val signature = SignatureChecker.validateSignature(
+      params.get("pollId").getOrElse(""),
+      params.get("nonce").getOrElse(""),
+      params.get("ts").getOrElse(""),
+      params.get("signature").getOrElse(""))
+    log.info("Is signature valid? " + signature)
+    if (signature) {
+      multiParams filterKeys { s => s.startsWith("q-") } foreach {
+        case (qid, ansids) =>
+          val pollId = params("pollId").toLong
+          val questionId = qid.drop(2).toLong
+          val answerIds = ansids.map { _.drop(2).toLong }
+          Ofy.transact(new PollIncrementer(pollId, questionId, answerIds))
+      }
     }
     redirect(params.get("returnTo").getOrElse("/"))
   }
