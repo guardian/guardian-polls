@@ -21,6 +21,7 @@ trait Ofy extends Objectify {
   def ofy: Objectify
 
   def load: ScalaLoader = new ScalaLoader(ofy.load)
+  def load[T](implicit m: Manifest[T]): LoadType[T] = ofy.load.`type`(m.erasure.asInstanceOf[Class[T]])
   def save: Saver = ofy.save
   def delete: Deleter = ofy.delete
   def getTxn: Transaction = ofy.getTxn
