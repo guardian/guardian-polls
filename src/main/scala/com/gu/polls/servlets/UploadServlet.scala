@@ -52,6 +52,13 @@ class UploadServlet extends ScalatraServlet {
   }
 
   post("/:key/queue") {
+    /*
+    Ofy.save.entity(e) returns an asynchronous Result by default, so mapping over a list of polls and saving
+    them doesn't actually save them, but queues them to be saved.
+    For some reason, exiting the handler can cause data to be lost rather than saved, so we call now() on
+    each Result, to synchronously wait for the save.
+    Since we map the saves then the nows, we should still only wait for the longest save action
+     */
     val polls: List[PollLine] = params("polls").asJson.convertTo[List[PollLine]]
     polls.flatMap { poll =>
       Answer.getOrCreate(poll.questionId, poll.answerId, poll.answerTotal) ::
@@ -60,6 +67,5 @@ class UploadServlet extends ScalatraServlet {
     }
       .map { Ofy.save.entity(_) }
       .map(_.now)
-
   }
 }

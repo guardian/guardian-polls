@@ -9,6 +9,4 @@ resolvers ++= Seq(
 
 addSbtPlugin("com.eed3si9n" % "sbt-appengine" % "0.4.0")
 
-addSbtPlugin("cc.spray" % "sbt-twirl" % "0.5.2")
-
 addSbtPlugin("com.typesafe.sbtscalariform" % "sbtscalariform" % "0.3.1")

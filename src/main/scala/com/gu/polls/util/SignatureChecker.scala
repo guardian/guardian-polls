@@ -9,6 +9,7 @@ import com.google.appengine.api.memcache.{ Expiration, MemcacheServiceFactory }
 
 object SignatureChecker {
 
+  // We namespace memcache into "nonce", which saves us doing "nonce:"+key everywhere
   lazy val memcache = MemcacheServiceFactory.getMemcacheService("nonce")
   lazy val KEY = Config.get("signing.key")
   lazy val keySpec = new SecretKeySpec(KEY.getBytes(), "HmacSHA1")
@@ -28,16 +29,19 @@ object SignatureChecker {
     val diffTime = ctime - ts.toLong
     logger.info("Difference in times is " + diffTime)
     if (diffTime > 0 && diffTime < 900) {
+      // Now check if the nonce has been used before
       logger.info("Memcache for nonce(" + nonce + ") is " + memcache.get(nonce))
       if (!memcache.contains(nonce)) {
+        // Mark this nonce as having been used
         memcache.put(nonce, "1", Expiration.byDeltaSeconds(900))
-        val mysig = sign(key)
+        val expected = sign(key)
         logger.info("Signed: " + key + " with key: " + KEY)
-        logger.info("Expected: " + mysig)
+        logger.info("Expected: " + expected)
         logger.info("Actual  : " + sig)
-        return mysig == sig
+        // Compare Actual and Expected Signatures
+        return expected == sig
       }
     }
-    return false
+    false
   }
 }

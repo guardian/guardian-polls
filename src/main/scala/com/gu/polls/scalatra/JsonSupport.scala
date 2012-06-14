@@ -3,6 +3,10 @@ package com.gu.polls.scalatra
 import org.scalatra.{ ScalatraKernel, ContentTypeInferrer, RenderPipeline }
 import cc.spray.json.JsValue
 
+/**
+ * JsonSupport is in Scalatra but doesn't support jsonp in this version
+ * In future it will
+ */
 trait JsonSupport extends ScalatraKernel {
   def jsonpCallbackParameterNames: Iterable[String] = None
 

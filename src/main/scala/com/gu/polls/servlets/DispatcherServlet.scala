@@ -7,7 +7,7 @@ import com.gu.polls.util.SignatureChecker
 
 import PollJsonProtocols._
 import com.weiglewilczek.slf4s.Logger
-import com.gu.polls.scalatra.{ JsonSupport, TwirlSupport }
+import com.gu.polls.scalatra.JsonSupport
 import com.googlecode.objectify.Objectify.Work
 import com.googlecode.objectify.Objectify
 import org.scalatra._
@@ -16,11 +16,8 @@ import com.google.appengine.api.NamespaceManager
 class PollIncrementer(val pollId: Long, val questionId: Long, val answerIds: Seq[Long]) extends Work[Unit] {
   val log = Logger(classOf[PollIncrementer])
   def run(ofy: Objectify) {
-    log.info("Starting Transaction")
     val q = Question.getOrCreate(pollId, questionId)
     val answers = answerIds.map { Answer.getOrCreate(questionId, _) }
-    log.info(q.toString)
-    log.info((answers.map { _.toString }).mkString(","))
     answers.foreach { answer =>
       answer.count += 1
       Ofy.save.entity(answer)
@@ -30,7 +27,7 @@ class PollIncrementer(val pollId: Long, val questionId: Long, val answerIds: Seq
   }
 }
 
-class DispatcherServlet extends ScalatraServlet with TwirlSupport with JsonSupport {
+class DispatcherServlet extends ScalatraServlet with JsonSupport {
   val log = Logger(classOf[DispatcherServlet])
 
   override def jsonpCallbackParameterNames = Some("callback")
@@ -55,20 +52,13 @@ class DispatcherServlet extends ScalatraServlet with TwirlSupport with JsonSuppo
     getPollAsJson(params("pollId").toLong)
   }
 
-  get("/:key") {
-    log.info(getPollAsJson(389852568).prettyPrint)
-    html.welcome.render(Question.getByPollId(389852568))
-  }
-
   post("/:key/:pollId") {
-    log.info("Submitted params: " + multiParams)
 
     val signature = SignatureChecker.validateSignature(
       params.get("pollId").getOrElse(""),
       params.get("nonce").getOrElse(""),
       params.get("ts").getOrElse(""),
       params.get("signature").getOrElse(""))
-    log.info("Is signature valid? " + signature)
     val pollId = params("pollId").toLong
 
     if (signature) {
