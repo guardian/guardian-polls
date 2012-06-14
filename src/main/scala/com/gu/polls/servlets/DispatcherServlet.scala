@@ -69,6 +69,6 @@ class DispatcherServlet extends ScalatraServlet with JsonSupport {
           Ofy.transact(new PollIncrementer(pollId, questionId, answerIds))
       }
     }
-    JsObject(Map("status" -> JsString("OK")))
+    redirect(request.referrer.getOrElse("http://www.guardian.co.uk/polls"))
   }
 }
