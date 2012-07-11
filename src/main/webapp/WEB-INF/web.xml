@@ -7,9 +7,17 @@
         <servlet-name>dataController</servlet-name>
         <servlet-class>com.gu.polls.servlets.UploadServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>fixServlet</servlet-name>
+        <servlet-class>com.gu.polls.servlets.PollFixerServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>dataController</servlet-name>
         <url-pattern>/data/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>fixServlet</servlet-name>
+        <url-pattern>/fix/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
@@ -18,6 +26,7 @@
     <security-constraint>
         <web-resource-collection>
             <url-pattern>/data/*</url-pattern>
+            <url-pattern>/fix/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>admin</role-name>
