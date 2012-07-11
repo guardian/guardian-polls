@@ -35,9 +35,6 @@ object SignatureChecker {
         // Mark this nonce as having been used
         memcache.put(nonce, "1", Expiration.byDeltaSeconds(900))
         val expected = sign(key)
-        logger.info("Signed: " + key + " with key: " + KEY)
-        logger.info("Expected: " + expected)
-        logger.info("Actual  : " + sig)
         // Compare Actual and Expected Signatures
         return expected == sig
       }

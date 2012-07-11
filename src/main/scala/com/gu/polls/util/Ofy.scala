@@ -50,13 +50,6 @@ object Ofy extends Ofy {
 
   protected val _conn = new DynamicVariable[Objectify](null)
 
-  def ofy: Objectify = {
-    if (_conn.value == null) {
-      _conn.value = ObjectifyService.factory.begin()
-      _conn.value.setWrapper(this)
-    }
-
-    _conn.value
-  }
+  def ofy: Objectify = ObjectifyService.factory.begin()
 
 }
