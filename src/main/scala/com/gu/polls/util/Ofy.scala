@@ -45,9 +45,6 @@ class OfyWrapper(val base: Objectify) extends Ofy {
 
 object Ofy extends Ofy {
 
-  ObjectifyService.register(classOf[Question])
-  ObjectifyService.register(classOf[Answer])
-
   protected val _conn = new DynamicVariable[Objectify](null)
 
   def ofy: Objectify = ObjectifyService.factory.begin()

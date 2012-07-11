@@ -32,6 +32,9 @@ class PollAnswerIncrementer(val questionId: Long, val answerId: Long) extends Wo
 }
 
 class DispatcherServlet extends ScalatraServlet with JsonSupport {
+  ObjectifyService.register(classOf[Question])
+  ObjectifyService.register(classOf[Answer])
+
   val log = Logger(classOf[DispatcherServlet])
 
   override def jsonpCallbackParameterNames = Some("callback")
