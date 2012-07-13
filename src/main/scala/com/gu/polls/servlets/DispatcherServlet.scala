@@ -83,4 +83,18 @@ class DispatcherServlet extends ScalatraServlet with JsonSupport {
     }
     redirect(request.referrer.getOrElse("http://www.guardian.co.uk/polls"))
   }
+
+  get("/") {
+    <html>
+      <head>
+        <title>Guardian Polls</title>
+      </head>
+      <body>
+        <h1>Guardian Polls</h1>
+        <p>Congratulations, you've found the guardian polls system.</p>
+        <p>Warning: No user servicable parts are contained within this application</p>
+        <p>Return to <a href="http://www.guardian.co.uk/">The Guardian</a></p>
+      </body>
+    </html>
+  }
 }
