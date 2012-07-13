@@ -56,6 +56,7 @@ class DispatcherServlet extends ScalatraServlet with JsonSupport {
   }
 
   get("/:key/:pollId") {
+    response.setHeader("Cache-Control", "max-age=5")
     getPollAsJson(params("pollId").toLong)
   }
 
