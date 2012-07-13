@@ -9,4 +9,8 @@
     <threadsafe>true</threadsafe>
     <sessions-enabled>true</sessions-enabled>
     <async-session-persistence enabled="true" />
+    <static-files>
+        <include path="/favicon.ico"/>
+        <include path="/robots.txt"/>
+    </static-files>
 </appengine-web-app>
