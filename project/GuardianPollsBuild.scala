@@ -37,4 +37,11 @@ object GuardianPollsBuild  extends Build {
     )
     .settings(appengineSettings: _*)
     .settings(scalariformSettings: _*)
+    .settings(resolvers <<= (resolvers) { r =>
+      r ++ Seq("maven" at "http://repo1.maven.org/maven2/",
+        "Guardian Github Releases" at "http://guardian.github.com/maven/repo-releases",
+        "spray repo" at "http://repo.spray.cc")
+    })
+
+
 }
